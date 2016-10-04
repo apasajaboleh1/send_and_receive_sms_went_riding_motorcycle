@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:text="hasil"
+        android:text=""
         android:textSize="20dp" />
     <Button
         android:layout_width="wrap_content"

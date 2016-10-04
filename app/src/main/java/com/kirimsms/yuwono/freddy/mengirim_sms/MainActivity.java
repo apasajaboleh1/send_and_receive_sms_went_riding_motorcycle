@@ -9,26 +9,27 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -113,6 +114,106 @@ public class MainActivity extends Activity implements SensorEventListener {
 
             // other 'case' lines to check for other
             // permissions this app might request
+        }
+    }
+    private class KNearstNeighbour extends AsyncTask<ArrayList<String>,Void,Integer>{
+
+
+        @Override
+        protected Integer doInBackground(ArrayList<String>... params) {
+            ArrayList<String> training_data=new ArrayList<String>();
+            double[] get_training_data= new double[5];
+            int[] mau_final= new int[10];
+            ArrayList<Pair<Double,Double>> res_sementara = new ArrayList<Pair<Double,Double>>();
+            StringBuilder sb= new StringBuilder();
+            ArrayList<String> temp12=params[0];
+            for(int x=0;x<temp12.size();x++)
+            {
+                String[] temp123=temp12.get(x).split(",");
+                for(int y=0;y<temp123.length;y++)
+                {
+                    get_training_data[y]=Double.parseDouble(temp123[y]);
+                    //sb.append(get_training_data[y]); -> ws oke
+                }
+
+                double[] perhitungan_knn=new double[2000];
+                for(int y=0;y<data.length;y++)
+                {
+                    double tempsaja=0.0;
+                    for(int z=1;z<data[y].length-1;z++)
+                    {
+                        tempsaja+=Math.pow(data[y][z]-get_training_data[z],2);
+                    }
+                    res_sementara.add(new Pair(Math.sqrt(tempsaja),data[y][data[y].length-1]));
+                    //sb.append(Math.sqrt(tempsaja));-> ws oke
+                }
+                Collections.sort(res_sementara, new Comparator<Pair<Double, Double>>() {
+                    @Override
+                    public int compare(Pair<Double, Double> lhs, Pair<Double, Double> rhs) {
+                        return Double.compare(lhs.first,rhs.first);
+                    }
+                });
+                //misalnya k =3
+                int[] simpan = new int[7];
+                Arrays.fill(simpan,0);
+                for(int y=0;y<3;y++)
+                {
+                    simpan[ res_sementara.get(y).second.intValue()]++;
+                    //sb.append(simpan[ res_sementara.get(y).second.intValue()]);
+                }
+                int max=0,res=0;
+                for(int y=0;y<7;y++)
+                {
+                    if(simpan[y]>max)
+                    {
+                        max=simpan[y];
+                        res=y;
+                    }
+                }
+                mau_final[x]=res;
+                //sb.append(mau_final[x]+"\n");-> bener
+            }
+            int[] temp_for_last_step= new int[20];
+            Arrays.fill(temp_for_last_step,0);
+            for(int x=0;x<mau_final.length;x++)
+            {
+                temp_for_last_step[mau_final[x]]++;
+                //sb.append(temp_for_last_step[mau_final[x]]+" "+ mau_final[x]+" ");
+            }
+            sb.append("\n");
+            /*for(int x=0;x<7;x++)
+                sb.append(temp_for_last_step[x]+"\n");*/
+            int max=0,res=0;
+            for(int x=0;x<7;x++)
+                if (temp_for_last_step[x]>max)
+                {
+                    max=temp_for_last_step[x];
+                    res=x;
+                    //sb.append(res+" "+temp_for_last_step[x]+" ");
+                }
+            //sb.append(res);
+            return res;
+            //    return sb.toString();
+        }
+
+        protected void onPostExecute(Integer result)
+        {
+
+            if(result==1)
+            alert_data("kemungkinan besar adalah jalan dengan device pada saku celana");
+            else if(result==2)
+                alert_data("kemungkinan besar adalah lari dengan device pada saku celama");
+            else if (result==3)
+                alert_data("kemungkinan besar adalah jalan dengan device pada saku kemeja");
+            else if(result==4)
+                alert_data("kemungkinan besar adalah lari dengan device pada saku kemeja");
+            else if (result==5)
+                alert_data("kemungkinan besar adalah duduk");
+            else alert_data("kemungkinan besar adalah naik sepeda motor");
+        }
+        protected void onPostExecute(String result)
+        {
+            alert_data(result);
         }
     }
     public void initdata() {
@@ -218,6 +319,15 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if(test_data.size()==10)
                 {
                     //async
+                    //debug
+                    /*StringBuilder sb=new StringBuilder();
+                    for(int x=0;x<test_data.size();x++)
+                        sb.append(test_data.get(x));
+                    alert_data(sb.toString());*/
+                    ArrayList<String> tempsaja=new ArrayList<String>(test_data);
+                    KNearstNeighbour dn =new KNearstNeighbour();
+                    dn.execute(tempsaja);
+                    test_data.clear();
                 }
             }
 

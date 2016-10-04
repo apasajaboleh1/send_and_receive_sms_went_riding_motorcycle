@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Mengirim_SMS.iml" filepath="$PROJECT_DIR$/Mengirim_SMS.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rahasia.iml" filepath="$PROJECT_DIR$/rahasia.iml" />
     </modules>
   </component>
 </project>
