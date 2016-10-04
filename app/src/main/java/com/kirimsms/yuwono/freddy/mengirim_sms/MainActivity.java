@@ -100,7 +100,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                        getfiledata();
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                 } else {
@@ -150,17 +150,22 @@ public class MainActivity extends Activity implements SensorEventListener {
                 Collections.sort(res_sementara, new Comparator<Pair<Double, Double>>() {
                     @Override
                     public int compare(Pair<Double, Double> lhs, Pair<Double, Double> rhs) {
-                        return Double.compare(lhs.first,rhs.first);
+                        return lhs.first < rhs.first ? -1 : lhs.first == rhs.first ? 0 : 1;
                     }
                 });
                 //misalnya k =3
                 int[] simpan = new int[7];
                 Arrays.fill(simpan,0);
-                for(int y=0;y<3;y++)
+                for(int y=0;y<50;y++)
                 {
                     simpan[ res_sementara.get(y).second.intValue()]++;
-                    //sb.append(simpan[ res_sementara.get(y).second.intValue()]);
+                    //sb.append(simpan[ res_sementara.get(y).second.intValue()]+" "+res_sementara.get(y).second.intValue());
                 }
+                /*for(int y=0;y<50;y++)
+                {
+                    sb.append(res_sementara.get(y).first+" "+res_sementara.get(y).second+"\n");
+                }
+                sb.append("\n\n sempak goreng\n");*/
                 int max=0,res=0;
                 for(int y=0;y<7;y++)
                 {
@@ -171,7 +176,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                     }
                 }
                 mau_final[x]=res;
-                //sb.append(mau_final[x]+"\n");-> bener
+                //sb.append(mau_final[x]+"\n");//-> bener
             }
             int[] temp_for_last_step= new int[20];
             Arrays.fill(temp_for_last_step,0);
@@ -193,7 +198,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 }
             //sb.append(res);
             return res;
-            //    return sb.toString();
+                //return sb.toString();
         }
 
         protected void onPostExecute(Integer result)
@@ -209,22 +214,15 @@ public class MainActivity extends Activity implements SensorEventListener {
                 alert_data("kemungkinan besar adalah lari dengan device pada saku kemeja");
             else if (result==5)
                 alert_data("kemungkinan besar adalah duduk");
-            else alert_data("kemungkinan besar adalah naik sepeda motor");
+            else if (result==6)alert_data("kemungkinan besar adalah naik sepeda motor");
         }
         protected void onPostExecute(String result)
         {
             alert_data(result);
         }
     }
-    public void initdata() {
-        sumbux = (TextView) findViewById(R.id.sumbux);
-        sumbuy = (TextView) findViewById(R.id.sumbuy);
-        sumbuz = (TextView) findViewById(R.id.sumbyz);
-        stop = (Button) findViewById(R.id.button);
-        result = (TextView) findViewById(R.id.result);
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                1);
+    public void getfiledata()
+    {
         File root = new File(Environment.getExternalStorageDirectory(), "/Notes/");
         if (!root.exists()) {
             alert_data("no folder in there");
@@ -247,6 +245,17 @@ public class MainActivity extends Activity implements SensorEventListener {
             alert_data("no file");
             e.getStackTrace();
         }
+    }
+    public void initdata() {
+        sumbux = (TextView) findViewById(R.id.sumbux);
+        sumbuy = (TextView) findViewById(R.id.sumbuy);
+        sumbuz = (TextView) findViewById(R.id.sumbyz);
+        stop = (Button) findViewById(R.id.button);
+        result = (TextView) findViewById(R.id.result);
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                1);
+
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
