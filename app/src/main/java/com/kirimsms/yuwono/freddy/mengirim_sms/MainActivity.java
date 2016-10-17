@@ -2,8 +2,11 @@ package com.kirimsms.yuwono.freddy.mengirim_sms;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -12,9 +15,14 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,6 +38,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.*;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -41,16 +50,23 @@ public class MainActivity extends Activity implements SensorEventListener {
     private static double[][] data = new double[2000][5];
     private boolean knowprox=false;
     private ArrayList<String> test_data= new ArrayList<String>();
+    private SmsMessage[] msgs = null;
+    private static MainActivity activity;
+
+    //private boolean statusmsg=false;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     //private GoogleApiClient client;
-
+    public static MainActivity instance() {
+        return activity;
+    }
     public static double[][] getdata()
     {
         return data;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +75,8 @@ public class MainActivity extends Activity implements SensorEventListener {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         //client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         initdata();
+        //SmsListener sl = new SmsListener();
+        //sl.onReceive();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -77,6 +95,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         }
 
+    }
+    public void onStart() {
+        super.onStart();
+        activity = this;
     }
     private void alert_data(String message)
     {
@@ -98,16 +120,19 @@ public class MainActivity extends Activity implements SensorEventListener {
             case 1: {
 
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED&& grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                         getfiledata();
+                    //Toast.makeText(MainActivity.this, "ok1", Toast.LENGTH_SHORT).show();
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                } else {
+                }
+
+                else {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    Toast.makeText(MainActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Permission denied to read your External storage / read SMS", Toast.LENGTH_SHORT).show();
                 }
                 return;
             }
@@ -116,8 +141,28 @@ public class MainActivity extends Activity implements SensorEventListener {
             // permissions this app might request
         }
     }
-    private class KNearstNeighbour extends AsyncTask<ArrayList<String>,Void,Integer>{
 
+    private class KNearstNeighbour extends AsyncTask<ArrayList<String>,Void,Integer>{
+        protected void sendingsms(String Pesan)
+        {
+            //alert_data(Pesan);
+            ArrayList<String> temp=new ArrayList<String>(SMSReceiver.getph());
+            for(int x=0;x<temp.size();x++)
+            {
+                String ph=temp.get(x);
+                try {
+                    SmsManager smsManager = SmsManager.getDefault();
+                    smsManager.sendTextMessage(ph, null, Pesan, null, null);
+                    Toast.makeText(getApplicationContext(), "SMS Sent!",
+                            Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            "SMS faild, please try again later!",
+                            Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+        }
 
         @Override
         protected Integer doInBackground(ArrayList<String>... params) {
@@ -203,22 +248,29 @@ public class MainActivity extends Activity implements SensorEventListener {
 
         protected void onPostExecute(Integer result)
         {
-
-            if(result==1)
-            alert_data("kemungkinan besar adalah jalan dengan device pada saku celana");
-            else if(result==2)
-                alert_data("kemungkinan besar adalah lari dengan device pada saku celama");
-            else if (result==3)
-                alert_data("kemungkinan besar adalah jalan dengan device pada saku kemeja");
-            else if(result==4)
-                alert_data("kemungkinan besar adalah lari dengan device pada saku kemeja");
-            else if (result==5)
-                alert_data("kemungkinan besar adalah duduk");
-            else if (result==6)alert_data("kemungkinan besar adalah naik sepeda motor");
+            //result =1 or 2 or 3 or 4 or 5 we dont send any of sms because our constraint that we want to send sms went the message arrive and we drive bike
+            if(result==1) {
+                //sendingsms("kemungkinan besar adalah jalan dengan device pada saku celana");
+            }
+            else if(result==2){
+                //sendingsms("kemungkinan besar adalah lari dengan device pada saku celama");
+            }
+            else if (result==3) {
+                //sendingsms("kemungkinan besar adalah jalan dengan device pada saku kemeja");
+            }
+            else if(result==4) {
+                //sendingsms("kemungkinan besar adalah lari dengan device pada saku kemeja");
+            }
+            else if (result==5) {
+                //sendingsms("kemungkinan besar adalah duduk");
+            }
+            else if (result==6){
+                sendingsms("kemungkinan besar adalah naik sepeda motor jadi smsnya nanti akan di balas");
+            }
         }
         protected void onPostExecute(String result)
         {
-            alert_data(result);
+            sendingsms(result);
         }
     }
     public void getfiledata()
@@ -246,15 +298,22 @@ public class MainActivity extends Activity implements SensorEventListener {
             e.getStackTrace();
         }
     }
+
     public void initdata() {
         sumbux = (TextView) findViewById(R.id.sumbux);
         sumbuy = (TextView) findViewById(R.id.sumbuy);
         sumbuz = (TextView) findViewById(R.id.sumbyz);
         stop = (Button) findViewById(R.id.button);
         result = (TextView) findViewById(R.id.result);
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+
+        boolean hasreadexternalstorage=(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED);
+        boolean hasreadsms=(ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED);
+        String[] permit={Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_SMS};
+        if(!hasreadexternalstorage||!hasreadsms)
+        ActivityCompat.requestPermissions(MainActivity.this, permit,
                 1);
+        else if (hasreadexternalstorage||hasreadsms)getfiledata();
 
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -267,6 +326,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onResume();
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, proxymity, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
     protected void onPause() {
         super.onPause();
@@ -333,9 +393,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                     for(int x=0;x<test_data.size();x++)
                         sb.append(test_data.get(x));
                     alert_data(sb.toString());*/
-                    ArrayList<String> tempsaja=new ArrayList<String>(test_data);
-                    KNearstNeighbour dn =new KNearstNeighbour();
-                    dn.execute(tempsaja);
+                    if(SMSReceiver.statuspesan) {
+                        //alert_data("benar");
+                        ArrayList<String> tempsaja = new ArrayList<String>(test_data);
+                        KNearstNeighbour dn = new KNearstNeighbour();
+                        dn.execute(tempsaja);
+                        SMSReceiver.statuspesan=false;
+                    }
                     test_data.clear();
                 }
             }

@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Mengirim_SMS</string>
+    <string name="app_name">SMS Receiver and Sending</string>
+    <string name="sms_message"><![CDATA[ From : %1$s<br/>%2$s]]></string>
 </resources>
