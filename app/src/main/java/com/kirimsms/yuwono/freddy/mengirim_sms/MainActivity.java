@@ -250,19 +250,19 @@ public class MainActivity extends Activity implements SensorEventListener {
         {
             //result =1 or 2 or 3 or 4 or 5 we dont send any of sms because our constraint that we want to send sms went the message arrive and we drive bike
             if(result==1) {
-                //sendingsms("kemungkinan besar adalah jalan dengan device pada saku celana");
+                sendingsms("kemungkinan besar adalah jalan dengan device pada saku celana");
             }
             else if(result==2){
-                //sendingsms("kemungkinan besar adalah lari dengan device pada saku celama");
+                sendingsms("kemungkinan besar adalah lari dengan device pada saku celama");
             }
             else if (result==3) {
-                //sendingsms("kemungkinan besar adalah jalan dengan device pada saku kemeja");
+                sendingsms("kemungkinan besar adalah jalan dengan device pada saku kemeja");
             }
             else if(result==4) {
-                //sendingsms("kemungkinan besar adalah lari dengan device pada saku kemeja");
+                sendingsms("kemungkinan besar adalah lari dengan device pada saku kemeja");
             }
             else if (result==5) {
-                //sendingsms("kemungkinan besar adalah duduk");
+                sendingsms("kemungkinan besar adalah duduk");
             }
             else if (result==6){
                 sendingsms("kemungkinan besar adalah naik sepeda motor jadi smsnya nanti akan di balas");

@@ -37,7 +37,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     String message = sms.getDisplayMessageBody();
                     String formattedText = String.format(context.getResources().getString(R.string.sms_message), sender, message);
                     // Display the SMS message in a Toast
-                    //Toast.makeText(context, formattedText, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, formattedText, Toast.LENGTH_LONG).show();
                     MainActivity inst = MainActivity.instance();
 
                     //inst.updateList(formattedText);
