@@ -2,11 +2,8 @@ package com.kirimsms.yuwono.freddy.mengirim_sms;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -21,8 +18,6 @@ import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,13 +27,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.*;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -146,7 +138,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         protected void sendingsms(String Pesan)
         {
             //alert_data(Pesan);
-            ArrayList<String> temp=new ArrayList<String>(SMSReceiver.getph());
+            ArrayList<String> temp=new ArrayList<String>(SmsReceiver.getph());
             for(int x=0;x<temp.size();x++)
             {
                 String ph=temp.get(x);
@@ -289,10 +281,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                 String[] temp2 = temp.split(",");
                 for (int x = 0; x < temp2.length; x++)
                     data[counter][x] = Double.parseDouble(temp2[x]);
-                counter++;
+                if(data[counter][1]>=2.0&&data[counter][2]>=2.0&&data[counter][3]>=2.0) {
+                    counter++;
+                }
+
             }
             //try bug success
-            //alert_data(String.valueOf(data[0][1]));
+            alert_data(String.valueOf(counter));
         } catch (IOException e) {
             alert_data("no file");
             e.getStackTrace();
@@ -379,28 +374,29 @@ public class MainActivity extends Activity implements SensorEventListener {
             if (deltaY < 2)
                 deltaY = 0;
             if(knowprox) {
-                StringBuilder getdata = new StringBuilder();
-                getdata.append(System.currentTimeMillis() + ",");
-                getdata.append(deltaX + ",");
-                getdata.append(deltaY + ",");
-                getdata.append(deltaZ + "\n");
-                test_data.add(getdata.toString());
-                if(test_data.size()==10)
-                {
-                    //async
-                    //debug
+                if(deltaX>0&&deltaY>0&&deltaZ>0) {
+                    StringBuilder getdata = new StringBuilder();
+                    getdata.append(System.currentTimeMillis() + ",");
+                    getdata.append(deltaX + ",");
+                    getdata.append(deltaY + ",");
+                    getdata.append(deltaZ + "\n");
+                    test_data.add(getdata.toString());
+                    if (test_data.size() == 10) {
+                        //async
+                        //debug
                     /*StringBuilder sb=new StringBuilder();
                     for(int x=0;x<test_data.size();x++)
                         sb.append(test_data.get(x));
                     alert_data(sb.toString());*/
-                    if(SMSReceiver.statuspesan) {
-                        //alert_data("benar");
-                        ArrayList<String> tempsaja = new ArrayList<String>(test_data);
-                        KNearstNeighbour dn = new KNearstNeighbour();
-                        dn.execute(tempsaja);
-                        SMSReceiver.statuspesan=false;
+                        if (SmsReceiver.statuspesan) {
+                            //alert_data("benar");
+                            ArrayList<String> tempsaja = new ArrayList<String>(test_data);
+                            KNearstNeighbour dn = new KNearstNeighbour();
+                            dn.execute(tempsaja);
+                            SmsReceiver.statuspesan = false;
+                        }
+                        test_data.clear();
                     }
-                    test_data.clear();
                 }
             }
 

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 /**
  * Created by GE72 2QD on 10/17/2016.
  */
-public class SMSReceiver extends BroadcastReceiver {
+public class SmsReceiver extends BroadcastReceiver {
     // SmsManager class is responsible for all SMS related actions
     final SmsManager sms = SmsManager.getDefault();
     public static boolean statuspesan=false;
