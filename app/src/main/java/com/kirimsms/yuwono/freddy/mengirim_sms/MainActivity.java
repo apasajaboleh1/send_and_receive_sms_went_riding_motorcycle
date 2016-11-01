@@ -374,7 +374,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             if (deltaY < 2)
                 deltaY = 0;
             if(knowprox) {
-                if(deltaX>0&&deltaY>0&&deltaZ>0) {
+                if(deltaX>0&&deltaY>0) {
                     StringBuilder getdata = new StringBuilder();
                     getdata.append(System.currentTimeMillis() + ",");
                     getdata.append(deltaX + ",");
