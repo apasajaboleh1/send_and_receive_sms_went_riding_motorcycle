@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 // If request is cancelled, the result arrays are empty.
 
                 if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED&& grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                        getfiledata();
+                    getfiledata();
                     //Toast.makeText(MainActivity.this, "ok1", Toast.LENGTH_SHORT).show();
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
@@ -235,7 +235,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 }
             //sb.append(res);
             return res;
-                //return sb.toString();
+            //return sb.toString();
         }
 
         protected void onPostExecute(Integer result)
@@ -279,11 +279,14 @@ public class MainActivity extends Activity implements SensorEventListener {
             int counter = 0;
             while ((temp = br.readLine()) != null) {
                 String[] temp2 = temp.split(",");
-                for (int x = 0; x < temp2.length; x++)
-                    data[counter][x] = Double.parseDouble(temp2[x]);
-                if(data[counter][1]>=2.0&&data[counter][2]>=2.0&&data[counter][3]>=2.0) {
-                    counter++;
+                for (int x = 0; x < temp2.length; x++) {
+                    if(x==3)data[counter][x] = Math.abs( Double.parseDouble(temp2[x])-9.0);
+                    else
+                        data[counter][x] = Double.parseDouble(temp2[x]);
                 }
+                //if(data[counter][1]>=2.0&&data[counter][2]>=2.0&&data[counter][3]>=2.0) {
+                counter++;
+                //}
 
             }
             //try bug success
@@ -306,8 +309,8 @@ public class MainActivity extends Activity implements SensorEventListener {
                 Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED);
         String[] permit={Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.READ_SMS};
         if(!hasreadexternalstorage||!hasreadsms)
-        ActivityCompat.requestPermissions(MainActivity.this, permit,
-                1);
+            ActivityCompat.requestPermissions(MainActivity.this, permit,
+                    1);
         else if (hasreadexternalstorage||hasreadsms)getfiledata();
 
         stop.setOnClickListener(new View.OnClickListener() {
@@ -373,31 +376,33 @@ public class MainActivity extends Activity implements SensorEventListener {
                 deltaX = 0;
             if (deltaY < 2)
                 deltaY = 0;
+            deltaZ-=9.0;
+            deltaZ=Math.abs(deltaZ);
             if(knowprox) {
-                if(deltaX>0&&deltaY>0) {
-                    StringBuilder getdata = new StringBuilder();
-                    getdata.append(System.currentTimeMillis() + ",");
-                    getdata.append(deltaX + ",");
-                    getdata.append(deltaY + ",");
-                    getdata.append(deltaZ + "\n");
-                    test_data.add(getdata.toString());
-                    if (test_data.size() == 10) {
-                        //async
-                        //debug
+                //if(deltaX>0&&deltaY>0&&deltaZ>0) {
+                StringBuilder getdata = new StringBuilder();
+                getdata.append(System.currentTimeMillis() + ",");
+                getdata.append(deltaX + ",");
+                getdata.append(deltaY + ",");
+                getdata.append(deltaZ + "\n");
+                test_data.add(getdata.toString());
+                if (test_data.size() == 10) {
+                    //async
+                    //debug
                     /*StringBuilder sb=new StringBuilder();
                     for(int x=0;x<test_data.size();x++)
                         sb.append(test_data.get(x));
                     alert_data(sb.toString());*/
-                        if (SmsReceiver.statuspesan) {
-                            //alert_data("benar");
-                            ArrayList<String> tempsaja = new ArrayList<String>(test_data);
-                            KNearstNeighbour dn = new KNearstNeighbour();
-                            dn.execute(tempsaja);
-                            SmsReceiver.statuspesan = false;
-                        }
-                        test_data.clear();
+                    if (SmsReceiver.statuspesan) {
+                        //alert_data("benar");
+                        ArrayList<String> tempsaja = new ArrayList<String>(test_data);
+                        KNearstNeighbour dn = new KNearstNeighbour();
+                        dn.execute(tempsaja);
+                        SmsReceiver.statuspesan = false;
                     }
+                    test_data.clear();
                 }
+                //}
             }
 
             // if the change is below 2, it is just plain noise
