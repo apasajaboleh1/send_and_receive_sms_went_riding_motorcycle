@@ -44,6 +44,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private ArrayList<String> test_data= new ArrayList<String>();
     private SmsMessage[] msgs = null;
     private static MainActivity activity;
+    // jumlah data buat rata - ratanya gmn
     private final static int jumlah_data=20;
     private static int supercounter=0;
     ArrayList<String> tel= new ArrayList<String>();
@@ -199,6 +200,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 //misalnya k =3
                 int[] simpan = new int[7];
                 Arrays.fill(simpan,0);
+                // ini bisa d ganti ganti .......
                 for(int y=0;y<10;y++)
                 {
                     simpan[ res_sementara.get(y).second.intValue()]++;
