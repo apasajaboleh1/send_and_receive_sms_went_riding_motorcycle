@@ -44,7 +44,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     private ArrayList<String> test_data= new ArrayList<String>();
     private SmsMessage[] msgs = null;
     private static MainActivity activity;
-
+    private final static int jumlah_data=20;
+    private static int supercounter=0;
+    ArrayList<String> tel= new ArrayList<String>();
     //private boolean statusmsg=false;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -142,6 +144,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             for(int x=0;x<temp.size();x++)
             {
                 String ph=temp.get(x);
+
                 try {
                     SmsManager smsManager = SmsManager.getDefault();
                     smsManager.sendTextMessage(ph, null, Pesan, null, null);
@@ -164,17 +167,20 @@ public class MainActivity extends Activity implements SensorEventListener {
             ArrayList<Pair<Double,Double>> res_sementara = new ArrayList<Pair<Double,Double>>();
             StringBuilder sb= new StringBuilder();
             ArrayList<String> temp12=params[0];
-            for(int x=0;x<temp12.size();x++)
-            {
-                String[] temp123=temp12.get(x).split(",");
+
+
+
+            //for(int x=0;x<temp12.size();x++)
+            //{
+                String[] temp123=temp12.get(0).split(",");
                 for(int y=0;y<temp123.length;y++)
                 {
                     get_training_data[y]=Double.parseDouble(temp123[y]);
-                    //sb.append(get_training_data[y]); -> ws oke
+                    //sb.append(get_training_data[y]); //-> ws oke
                 }
 
                 double[] perhitungan_knn=new double[2000];
-                for(int y=0;y<data.length;y++)
+                for(int y=0;y<supercounter;y++)
                 {
                     double tempsaja=0.0;
                     for(int z=1;z<data[y].length-1;z++)
@@ -182,7 +188,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                         tempsaja+=Math.pow(data[y][z]-get_training_data[z],2);
                     }
                     res_sementara.add(new Pair(Math.sqrt(tempsaja),data[y][data[y].length-1]));
-                    //sb.append(Math.sqrt(tempsaja));-> ws oke
+                    //sb.append(Math.sqrt(tempsaja)+" "+data[y][data[y].length-1]+"\n");//-> ws oke
                 }
                 Collections.sort(res_sementara, new Comparator<Pair<Double, Double>>() {
                     @Override
@@ -193,7 +199,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 //misalnya k =3
                 int[] simpan = new int[7];
                 Arrays.fill(simpan,0);
-                for(int y=0;y<50;y++)
+                for(int y=0;y<10;y++)
                 {
                     simpan[ res_sementara.get(y).second.intValue()]++;
                     //sb.append(simpan[ res_sementara.get(y).second.intValue()]+" "+res_sementara.get(y).second.intValue());
@@ -212,10 +218,13 @@ public class MainActivity extends Activity implements SensorEventListener {
                         res=y;
                     }
                 }
-                mau_final[x]=res;
+
+                return res;
+                //return sb.toString();
+                //alert_data(Integer.toString(res));
                 //sb.append(mau_final[x]+"\n");//-> bener
-            }
-            int[] temp_for_last_step= new int[20];
+
+            /*int[] temp_for_last_step= new int[20];
             Arrays.fill(temp_for_last_step,0);
             for(int x=0;x<mau_final.length;x++)
             {
@@ -224,7 +233,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             }
             sb.append("\n");
             /*for(int x=0;x<7;x++)
-                sb.append(temp_for_last_step[x]+"\n");*/
+                sb.append(temp_for_last_step[x]+"\n");
             int max=0,res=0;
             for(int x=0;x<7;x++)
                 if (temp_for_last_step[x]>max)
@@ -233,8 +242,9 @@ public class MainActivity extends Activity implements SensorEventListener {
                     res=x;
                     //sb.append(res+" "+temp_for_last_step[x]+" ");
                 }
-            //sb.append(res);
-            return res;
+            //sb.append(res);*/
+
+            //return hasil_yang_didapat;
             //return sb.toString();
         }
 
@@ -242,27 +252,37 @@ public class MainActivity extends Activity implements SensorEventListener {
         {
             //result =1 or 2 or 3 or 4 or 5 we dont send any of sms because our constraint that we want to send sms went the message arrive and we drive bike
             if(result==1) {
+                alert_data("jalan celana");
                 sendingsms("kemungkinan besar adalah jalan dengan device pada saku celana");
             }
             else if(result==2){
+                alert_data("saku celana");
                 sendingsms("kemungkinan besar adalah lari dengan device pada saku celama");
             }
             else if (result==3) {
+                alert_data("saku kemeja");
                 sendingsms("kemungkinan besar adalah jalan dengan device pada saku kemeja");
             }
             else if(result==4) {
+                alert_data("lari kemeja");
                 sendingsms("kemungkinan besar adalah lari dengan device pada saku kemeja");
             }
             else if (result==5) {
+                alert_data("duduk");
                 sendingsms("kemungkinan besar adalah duduk");
             }
             else if (result==6){
+                alert_data("motor");
                 sendingsms("kemungkinan besar adalah naik sepeda motor jadi smsnya nanti akan di balas");
+            }
+            else
+            {
+                alert_data(Integer.toString(result));
             }
         }
         protected void onPostExecute(String result)
         {
-            sendingsms(result);
+            alert_data(result);
         }
     }
     public void getfiledata()
@@ -274,23 +294,47 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         File data_location = new File(root, "training.csv");
         try {
+            StringBuilder sb= new StringBuilder();
             BufferedReader br = new BufferedReader(new FileReader(data_location));
             String temp;
-            int counter = 0;
+            int counter = 0,counter1=0;
+            double x=0.0,y=0.0,z=0.0,time=0.0,clas=0.0;
             while ((temp = br.readLine()) != null) {
                 String[] temp2 = temp.split(",");
-                for (int x = 0; x < temp2.length; x++) {
+                /*for (int x = 0; x < temp2.length; x++) {
                     if(x==3)data[counter][x] = Math.abs( Double.parseDouble(temp2[x])-9.0);
                     else
                         data[counter][x] = Double.parseDouble(temp2[x]);
-                }
+                }*/
+                x+=Double.parseDouble(temp2[1]);
+                y+=Double.parseDouble(temp2[2]);
+                z+=Math.abs( Double.parseDouble(temp2[3])-9.0);
+                time+=Double.parseDouble(temp2[0]);
+                clas+=Double.parseDouble(temp2[4]);
                 //if(data[counter][1]>=2.0&&data[counter][2]>=2.0&&data[counter][3]>=2.0) {
-                counter++;
+                counter1++;
+                if(counter1==jumlah_data)
+                {
+                    x/=jumlah_data;y/=jumlah_data;z/=jumlah_data;time/=jumlah_data;clas/=jumlah_data;counter1=0;
+                    data[counter][0]=time;data[counter][1]=x;data[counter][2]=y;data[counter][3]=z;data[counter][4]=Math.floor(clas);
+                    counter++;
+                    sb.append(data[counter-1][1]+" "+data[counter-1][2]+" "+data[counter-1][3]+"\n");
+                    x=0.0;y=0.0;z=0.0;clas=0.0;
+
+                }
                 //}
 
             }
+            if(counter1!=0)
+            {
+                x/=counter1;y/=counter1;z/=counter1;time/=counter1;
+                data[counter][0]=time;data[counter][1]=x;data[counter][2]=y;data[counter][3]=z;
+                sb.append(x+" "+y+" "+z+"\n");
+                counter++;
+            }
+            supercounter=counter;
             //try bug success
-            alert_data(String.valueOf(counter));
+            alert_data(String.valueOf(sb));
         } catch (IOException e) {
             alert_data("no file");
             e.getStackTrace();
@@ -334,13 +378,16 @@ public class MainActivity extends Activity implements SensorEventListener {
         sumbux.setText("0.0");
         sumbuy.setText("0.0");
         sumbuz.setText("0.0");
+        result.setText("0");
     }
 
     // display the current x,y,z accelerometer values
-    public void displayCurrentValues() {
+    public void displayCurrentValues(int a) {
         sumbux.setText(Double.toString(deltaX));
         sumbuy.setText(Double.toString(deltaY));
         sumbuz.setText(Double.toString(deltaZ));
+
+        result.setText(Integer.toString(a));
     }
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -364,7 +411,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             // clean current values
             displayCleanValues();
             // display the current x,y,z accelerometer values
-            displayCurrentValues();
+
             // display the max x,y,z accelerometer values
             //displayMaxValues();
 
@@ -378,30 +425,42 @@ public class MainActivity extends Activity implements SensorEventListener {
                 deltaY = 0;
             deltaZ-=9.0;
             deltaZ=Math.abs(deltaZ);
-            if(knowprox) {
+            double x=0.0,y=0.0,z=0.0;
+            //int counter12=0;
+
+            if(knowprox&&SmsReceiver.statuspesan) {
                 //if(deltaX>0&&deltaY>0&&deltaZ>0) {
-                StringBuilder getdata = new StringBuilder();
-                getdata.append(System.currentTimeMillis() + ",");
-                getdata.append(deltaX + ",");
-                getdata.append(deltaY + ",");
-                getdata.append(deltaZ + "\n");
-                test_data.add(getdata.toString());
-                if (test_data.size() == 10) {
+                x+=deltaX;y+=deltaY;z+=deltaZ;
+                StringBuilder sb= new StringBuilder();
+                sb.append(x+y+z);
+                tel.add(sb.toString());
+                displayCurrentValues(tel.size());
+                //if (test_data.size() == 10) {
                     //async
                     //debug
                     /*StringBuilder sb=new StringBuilder();
                     for(int x=0;x<test_data.size();x++)
                         sb.append(test_data.get(x));
                     alert_data(sb.toString());*/
-                    if (SmsReceiver.statuspesan) {
-                        //alert_data("benar");
+                    if ( tel.size()== jumlah_data) {
+                        alert_data("benar");
+                        x/=jumlah_data;y/=jumlah_data;z/=jumlah_data;
+                        StringBuilder getdata = new StringBuilder();
+                        getdata.append(System.currentTimeMillis() + ",");
+                        getdata.append( x+ ",");
+                        getdata.append(y + ",");
+                        getdata.append(z + "\n");
+                        test_data.add(getdata.toString());
+                        x=y=z=0.0;
                         ArrayList<String> tempsaja = new ArrayList<String>(test_data);
                         KNearstNeighbour dn = new KNearstNeighbour();
                         dn.execute(tempsaja);
                         SmsReceiver.statuspesan = false;
+                        test_data.clear();
+                        tel.clear();
                     }
-                    test_data.clear();
-                }
+
+                //}
                 //}
             }
 
